@@ -1,0 +1,13 @@
+[Unit]
+Description=Kubernetes Kubelet
+Documentation=https://github.com/kubernetes/kubernetes
+After=containerd.service
+Requires=containerd.service
+
+[Service]
+<%= @exec_start_string %>
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target
