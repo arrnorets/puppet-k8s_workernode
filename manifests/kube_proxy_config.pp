@@ -9,7 +9,8 @@ class k8s_workernode::kube_proxy_config ( Hash $kube_proxy_config_hash, Hash $ku
         mode => '0600',
         owner => root,
         group => root,
-        content => inline_template( hash2yml( $kubeconfigs_hash[ "${kube_proxy_kubeconfig}" ] ) )
+        content => inline_template( hash2yml( $kubeconfigs_hash[ "${kube_proxy_kubeconfig}" ] ) ),
+        notify => Service[ "k8s-kubeproxy" ]
     }
 
     file { "${kube_proxy_yamlconfig}" :
@@ -17,7 +18,8 @@ class k8s_workernode::kube_proxy_config ( Hash $kube_proxy_config_hash, Hash $ku
         mode => '0600',
         owner => root,
         group => root,
-        content => inline_template( hash2yml( $kube_proxy_config_hash["conf"][ "${kube_proxy_yamlconfig}" ] ) ) 
+        content => inline_template( hash2yml( $kube_proxy_config_hash["conf"][ "${kube_proxy_yamlconfig}" ] ) ),
+        notify => Service[ "k8s-kubeproxy" ]
     }
 
     $exec_start_string = create_k8s_kube_proxy_exec_start( $k8s_kube_proxy_binarypath, $kube_proxy_config_hash )
@@ -27,7 +29,8 @@ class k8s_workernode::kube_proxy_config ( Hash $kube_proxy_config_hash, Hash $ku
         mode => '0644',
         owner => root,
         group => root,
-        content => template("k8s_workernode/k8s-kubeproxy.systemd.erb")
+        content => template("k8s_workernode/k8s-kubeproxy.systemd.erb"),
+        notify => Service[ "k8s-kubeproxy" ]
     }
 
     exec { "systemd_reload_by_k8s_kube_proxy":

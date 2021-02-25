@@ -24,6 +24,7 @@ class k8s_workernode {
     $k8s_kube_proxy_pkg_name = $hash_from_hiera_kube_proxy['pkg_name'] ? { undef => 'present', default => $hash_from_hiera_kube_proxy['pkg_name'] }
     $k8s_kube_proxy_pkg_version = $hash_from_hiera_kube_proxy['pkg_version'] ? { undef => 'present', default => $hash_from_hiera_kube_proxy['pkg_version'] }
     $k8s_kube_proxy_parameter_hash = $hash_from_hiera_kube_proxy['parameters'] ? { undef => 'false', default => $hash_from_hiera_kube_proxy['parameters'] } 
+    $k8s_kube_proxy_service_enable_value = $hash_from_hiera_kube_proxy['enable'] ? { undef => false, default => $hash_from_hiera_kube_proxy['enable'] }
     # /* END BLOCK */
 
     # /* Kubelet parameters start here */
@@ -31,6 +32,7 @@ class k8s_workernode {
     $k8s_kubelet_pkg_name = $hash_from_hiera_kubelet['pkg_name'] ? { undef => 'present', default => $hash_from_hiera_kubelet['pkg_name'] }
     $k8s_kubelet_pkg_version = $hash_from_hiera_kubelet['pkg_version'] ? { undef => 'present', default => $hash_from_hiera_kubelet['pkg_version'] }
     $k8s_kubelet_parameter_hash = $hash_from_hiera_kubelet['parameters'] ? { undef => 'false', default => $hash_from_hiera_kubelet['parameters'] } 
+    $k8s_kubelet_service_enable_value = $hash_from_hiera_kubelet['enable'] ? { undef => false, default => $hash_from_hiera_kubelet['enable'] }
     # /* END BLOCK */
 
     # /* CNI plugin and crictl packages */
@@ -68,5 +70,11 @@ class k8s_workernode {
         kubelet_config_hash => $k8s_kubelet_parameter_hash,
         tls_hash => $tls_credetials_hash
     }
+
+    class { "k8s_workernode::service" :
+        k8s_kube_proxy_service_enable => $k8s_kube_proxy_service_enable_value,
+        k8s_kubelet_service_enable => $k8s_kubelet_service_enable_value
+    }
+
 }
 

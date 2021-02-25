@@ -29,7 +29,8 @@ class k8s_workernode::kubelet_config ( Hash $per_node_kubelet_conf, Hash $kubele
         mode => '0644',
         owner => root,
         group => root,
-        content => inline_template( $own_ca_crt )
+        content => inline_template( $own_ca_crt ),
+        notify => Service[ "k8s-kubelet" ]
     }
 
     file { "${kubelet_yamlconfig_tls_cert_path}" :
@@ -37,7 +38,8 @@ class k8s_workernode::kubelet_config ( Hash $per_node_kubelet_conf, Hash $kubele
         mode => '0644',
         owner => root,
         group => root,
-        content => inline_template( $kubelet_tls_cert )
+        content => inline_template( $kubelet_tls_cert ),
+        notify => Service[ "k8s-kubelet" ]
     }
 
     file { "${kubelet_yamlconfig_tls_key_path}" :
@@ -45,7 +47,8 @@ class k8s_workernode::kubelet_config ( Hash $per_node_kubelet_conf, Hash $kubele
         mode => '0600',
         owner => root,
         group => root,
-        content => inline_template( $kubelet_tls_key )
+        content => inline_template( $kubelet_tls_key ),
+        notify => Service[ "k8s-kubelet" ]
     }
 
     file { "${kubelet_kubeconfig}" :
@@ -53,7 +56,8 @@ class k8s_workernode::kubelet_config ( Hash $per_node_kubelet_conf, Hash $kubele
         mode => '0600',
         owner => root,
         group => root,
-        content => inline_template( hash2yml( $per_node_kubelet_conf["kubeconfig"][ $kubelet_kubeconfig ] ) )
+        content => inline_template( hash2yml( $per_node_kubelet_conf["kubeconfig"][ $kubelet_kubeconfig ] ) ),
+        notify => Service[ "k8s-kubelet" ]
     }
 
 
@@ -62,7 +66,8 @@ class k8s_workernode::kubelet_config ( Hash $per_node_kubelet_conf, Hash $kubele
         mode => '0600',
         owner => root,
         group => root,
-        content => inline_template( "${kubelet_yamlconfig_main_part}tlsCertFile: ${kubelet_yamlconfig_tls_cert_path}\ntlsPrivateKeyFile: ${kubelet_yamlconfig_tls_key_path}\n")
+        content => inline_template( "${kubelet_yamlconfig_main_part}tlsCertFile: ${kubelet_yamlconfig_tls_cert_path}\ntlsPrivateKeyFile: ${kubelet_yamlconfig_tls_key_path}\n"),
+        notify => Service[ "k8s-kubelet" ]
     }
 
     $exec_start_string = create_k8s_kubelet_exec_start( $k8s_kubelet_binarypath, $kubelet_config_hash, $kubelet_kubeconfig, $node_ip )
@@ -72,7 +77,8 @@ class k8s_workernode::kubelet_config ( Hash $per_node_kubelet_conf, Hash $kubele
         mode => '0644',
         owner => root,
         group => root,
-        content => template("k8s_workernode/k8s-kubelet.systemd.erb")
+        content => template("k8s_workernode/k8s-kubelet.systemd.erb"),
+	notify => Service[ "k8s-kubelet" ]
     }
 
     exec { "systemd_reload_by_k8s_kubelet":
